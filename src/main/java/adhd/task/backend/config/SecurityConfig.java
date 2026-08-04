@@ -65,7 +65,12 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/v1/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/v1/auth/refresh").permitAll()
                         .requestMatchers("/actuator/health").permitAll()
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/swagger-ui.html").permitAll()
+                        .requestMatchers("/swagger-ui/**").permitAll()
+                        .requestMatchers("/v3/api-docs/**").permitAll()
+                        .requestMatchers("/v3/api-docs").permitAll()
+                        .requestMatchers("/webjars/**").permitAll()
+//                      .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
 
                         // Todas as outras rotas requerem autenticação
                         .anyRequest().authenticated()
