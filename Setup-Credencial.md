@@ -16,15 +16,14 @@ $env:JWT_SECRET = "chave_jwt"
 ```bash
 export DB_URL="jdbc:postgresql://localhost:5432/tdah_app"
 export DB_USERNAME="postgres"
-export DB_PASSWORD="sua_senha_postgres"
-export JWT_SECRET="sua_chave_jwt"
+export DB_PASSWORD="a_senha_postgres"
+export JWT_SECRET="chave_jwt"
 ```
 
 ## 2. Firebase Credentials
 
-1. Baixar arquivo `firebase-credentials.json` do Firebase Console
+1. Baixar seu arquivo `firebase-credentials.json` do Firebase Console
 2. Colocar em: `src/main/resources/firebase-credentials.json`
-3. ⚠️ NÃO fazer commit deste arquivo! Está no `.gitignore`
 
 ## 3. Rodar
 
