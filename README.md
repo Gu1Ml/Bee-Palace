@@ -16,7 +16,20 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
    npx expo start
    ```
 
-In the output, you'll find options to open the app in a
+3. Create .env
+
+   ```bash
+   template: 
+   # Backend API 
+   API_BASE_URL=http://localOuIp:8080/api
+   API_TIMEOUT={num}
+   
+   # Firebase (opcional, adicione depois)
+   FIREBASE_API_KEY="key_aqui"
+   FIREBASE_PROJECT_ID="id_project_aqui"
+   ```
+   
+## In the output, you'll find options to open the app in a
 
 - [development build](https://docs.expo.dev/develop/development-builds/introduction/)
 - [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
