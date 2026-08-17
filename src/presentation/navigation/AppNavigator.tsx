@@ -5,11 +5,13 @@ import { createStackNavigator } from '@react-navigation/stack';
 import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
 import TasksScreen from '../screens/TasksScreen';
+import CreateTaskScreen from '../screens/CreateTaskScreen'; // ✅ ADICIONAR
 
 export type RootStackParamList = {
   Login: undefined;
   Register: undefined;
   Tasks: undefined;
+  CreateTask: undefined; // ✅ ADICIONAR
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -40,7 +42,14 @@ export default function AppNavigator() {
           component={TasksScreen}
           options={{
             title: 'Minhas Tarefas',
-            headerLeft: () => null, // sem botão voltar
+            headerLeft: () => null,
+          }}
+        />
+        <Stack.Screen
+          name="CreateTask"
+          component={CreateTaskScreen}
+          options={{
+            headerShown: false,
           }}
         />
       </Stack.Navigator>

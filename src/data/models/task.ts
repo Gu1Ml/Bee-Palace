@@ -31,3 +31,11 @@ export interface CreateTaskRequest {
   deadline?: string;
   recurringType?: 'NONE' | 'DAILY' | 'WEEKLY' | 'MONTHLY';
 }
+
+export interface UpdateTaskRequest {
+  title?: string;
+  description?: string;
+  priority?: 'LOW' | 'MEDIUM' | 'HIGH';
+  deadline?: string;
+  recurringType?: 'NONE' | 'DAILY' | 'WEEKLY' | 'MONTHLY';
+}
