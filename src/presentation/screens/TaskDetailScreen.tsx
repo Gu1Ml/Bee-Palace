@@ -1,16 +1,17 @@
 import { StackNavigationProp } from "@react-navigation/stack";
 import React, { useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTaskDetail } from "../../hooks/useTaskDetail";
+import TaskItemsSection from "../components/TaskItemsSection"; // ✅ NOVO
 import { RootStackParamList } from "../navigation/AppNavigator";
 
 type TaskDetailScreenNavigationProp = StackNavigationProp<
@@ -228,6 +229,9 @@ export default function TaskDetailScreen({ navigation, route }: Props) {
             </Text>
           )}
         </View>
+
+        {/* ✅ NOVO: Subtarefas */}
+        <TaskItemsSection taskId={task.id} />
 
         {/* Ações */}
         <View style={styles.actionsSection}>

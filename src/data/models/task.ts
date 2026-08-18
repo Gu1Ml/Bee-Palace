@@ -85,3 +85,26 @@ export interface TaskAttachment {
   fileSize: number;
   uploadedAt: string;
 }
+
+// ✅ ATUALIZAR: CreateTaskItemRequest
+export interface CreateTaskItemRequest {
+  title: string;
+  orderIndex?: number;
+}
+
+// ✅ ATUALIZAR: UpdateTaskItemRequest
+export interface UpdateTaskItemRequest {
+  title?: string;
+  orderIndex?: number;
+}
+
+// ✅ JÁ EXISTE (verificar se está assim):
+export interface TaskItem {
+  id: string;
+  taskId: string;
+  title: string;
+  isCompleted: boolean;
+  orderIndex?: number;
+  createdAt: string;
+  updatedAt: string;
+}
