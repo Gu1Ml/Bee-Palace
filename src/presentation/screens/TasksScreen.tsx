@@ -96,19 +96,26 @@ export default function TasksScreen({ navigation }: Props) {
 
   const renderTask = ({ item }: { item: Task }) => (
     <TouchableOpacity
+      // ✅ NOVO: Abrir detalhes ao clicar
+      onPress={() => navigation.navigate("TaskDetail", { taskId: item.id })}
       style={[styles.taskCard, item.isCompleted && styles.taskCardCompleted]}
       activeOpacity={0.7}
     >
       <View style={styles.taskContent}>
         <View style={styles.taskHeader}>
           <TouchableOpacity
-            style={[
-              styles.checkbox,
-              item.isCompleted && styles.checkboxChecked,
-            ]}
+            // ✅ NOVO: Impedir propagação do clique
             onPress={() => toggleTask(item)}
+            activeOpacity={0.7}
           >
-            {item.isCompleted && <Text style={styles.checkmark}>✓</Text>}
+            <View
+              style={[
+                styles.checkbox,
+                item.isCompleted && styles.checkboxChecked,
+              ]}
+            >
+              {item.isCompleted && <Text style={styles.checkmark}>✓</Text>}
+            </View>
           </TouchableOpacity>
 
           <View style={styles.taskInfo}>
@@ -141,8 +148,12 @@ export default function TasksScreen({ navigation }: Props) {
           </View>
 
           <TouchableOpacity
+            // ✅ NOVO: Impedir propagação do clique
+            onPress={(e) => {
+              e.stopPropagation?.();
+              handleDeleteTask(item);
+            }}
             style={styles.deleteButton}
-            onPress={() => handleDeleteTask(item)}
           >
             <Text style={styles.deleteButtonText}>Deletar</Text>
           </TouchableOpacity>
