@@ -12,12 +12,13 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useDispatch } from "react-redux";
-import { RootStackParamList } from "../navigation/AppNavigator";
-
-import { logout } from "../../store/slices/authSlice";
-
 import { Task } from "../../data/models/task";
+import { useTaskFilters } from "../../hooks/useTaskFilters";
 import { useTasks } from "../../hooks/useTasks";
+import { logout } from "../../store/slices/authSlice";
+import FilterBar from "../components/FilterBar";
+import FilterModal from "../components/FilterModal";
+import { RootStackParamList } from "../navigation/AppNavigator";
 
 type TasksScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -45,6 +46,19 @@ export default function TasksScreen({ navigation }: Props) {
   const { tasks, isLoading, error, filter, loadTasks, toggleTask, removeTask } =
     useTasks();
   const [refreshing, setRefreshing] = useState(false);
+  const [showFilterModal, setShowFilterModal] = useState(false); // ✅ NOVO
+
+  const {
+    tasks: filteredTasks,
+    filters,
+    hasActiveFilters,
+    updateStatusFilter,
+    updatePriorityFilter,
+    updateSearchText,
+    updateSortBy,
+    updateSortOrder,
+    clearFilters,
+  } = useTaskFilters();
 
   const handleLogout = async () => {
     await AsyncStorage.removeItem("accessToken");
@@ -89,9 +103,9 @@ export default function TasksScreen({ navigation }: Props) {
   };
 
   const stats = {
-    total: tasks.length,
-    completed: tasks.filter((t) => t.isCompleted).length,
-    pending: tasks.filter((t) => !t.isCompleted).length,
+    total: filteredTasks.length,
+    completed: filteredTasks.filter((t) => t.isCompleted).length,
+    pending: filteredTasks.filter((t) => !t.isCompleted).length,
   };
 
   const renderTask = ({ item }: { item: Task }) => (
@@ -166,11 +180,9 @@ export default function TasksScreen({ navigation }: Props) {
     <View style={styles.emptyContainer}>
       <Text style={styles.emptyTitle}>Nenhuma tarefa</Text>
       <Text style={styles.emptySubtitle}>
-        {filter === "COMPLETED"
-          ? "Você não tem tarefas completas"
-          : filter === "PENDING"
-            ? "Todas as suas tarefas estão completas! 🎉"
-            : "Crie sua primeira tarefa"}
+        {hasActiveFilters
+          ? "Nenhuma tarefa corresponde aos filtros"
+          : "Crie sua primeira tarefa"}
       </Text>
     </View>
   );
@@ -215,6 +227,26 @@ export default function TasksScreen({ navigation }: Props) {
         </View>
       </View>
 
+      {/* ✅ NOVO: Filter Bar */}
+      <FilterBar
+        filters={filters}
+        onStatusChange={updateStatusFilter}
+        onSearchChange={updateSearchText}
+        onFilterPress={() => setShowFilterModal(true)}
+        hasActiveFilters={hasActiveFilters}
+      />
+
+      {/* ✅ NOVO: Filter Modal */}
+      <FilterModal
+        visible={showFilterModal}
+        filters={filters}
+        onClose={() => setShowFilterModal(false)}
+        onPriorityChange={updatePriorityFilter}
+        onSortByChange={updateSortBy}
+        onSortOrderChange={updateSortOrder}
+        onReset={clearFilters}
+      />
+
       {/* Error Message */}
       {error && (
         <View style={styles.errorContainer}>
@@ -229,7 +261,7 @@ export default function TasksScreen({ navigation }: Props) {
         </View>
       ) : (
         <FlatList
-          data={tasks}
+          data={filteredTasks}
           renderItem={renderTask}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.listContent}

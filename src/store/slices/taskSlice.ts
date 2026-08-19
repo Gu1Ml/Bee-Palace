@@ -1,15 +1,25 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Task, TaskItem } from "../../data/models/task";
 
+// ✅ NOVO: Interface para filtros
+export interface TaskFilters {
+  status: "ALL" | "COMPLETED" | "PENDING";
+  priority: "ALL" | "LOW" | "MEDIUM" | "HIGH";
+  searchText: string;
+  sortBy: "createdAt" | "deadline" | "priority" | "title";
+  sortOrder: "asc" | "desc";
+}
+
 interface TaskState {
   tasks: Task[];
   selectedTask: Task | null;
   isLoading: boolean;
   isDetailLoading: boolean;
   error: string | null;
-  filter: "ALL" | "COMPLETED" | "PENDING";
 
-  // ✅ NOVO: items da tarefa selecionada
+  // ✅ NOVO: Filtros (substitui 'filter')
+  filters: TaskFilters;
+
   items: TaskItem[];
   isItemsLoading: boolean;
 }
@@ -20,9 +30,16 @@ const initialState: TaskState = {
   isLoading: false,
   isDetailLoading: false,
   error: null,
-  filter: "ALL",
 
   // ✅ NOVO:
+  filters: {
+    status: "ALL",
+    priority: "ALL",
+    searchText: "",
+    sortBy: "createdAt",
+    sortOrder: "desc",
+  },
+
   items: [],
   isItemsLoading: false,
 };
@@ -31,7 +48,7 @@ const taskSlice = createSlice({
   name: "tasks",
   initialState,
   reducers: {
-    // ── Existentes ──────────────────────────────────────
+    // ── Existentes ────────────────────────────
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.isLoading = action.payload;
     },
@@ -52,7 +69,7 @@ const taskSlice = createSlice({
     },
     clearSelectedTask: (state) => {
       state.selectedTask = null;
-      state.items = []; // ✅ Limpar items também
+      state.items = [];
     },
     addTask: (state, action: PayloadAction<Task>) => {
       state.tasks.unshift(action.payload);
@@ -68,14 +85,8 @@ const taskSlice = createSlice({
       state.tasks = state.tasks.filter((t) => t.id !== action.payload);
       if (state.selectedTask?.id === action.payload) {
         state.selectedTask = null;
-        state.items = []; // ✅ Limpar items também
+        state.items = [];
       }
-    },
-    setFilter: (
-      state,
-      action: PayloadAction<"ALL" | "COMPLETED" | "PENDING">,
-    ) => {
-      state.filter = action.payload;
     },
     loadTasksFailure: (state, action: PayloadAction<string>) => {
       state.error = action.payload;
@@ -85,8 +96,6 @@ const taskSlice = createSlice({
       state.error = action.payload;
       state.isDetailLoading = false;
     },
-
-    // ── ✅ NOVOS: Items ────────────────────────────────
     setItemsLoading: (state, action: PayloadAction<boolean>) => {
       state.isItemsLoading = action.payload;
     },
@@ -96,7 +105,6 @@ const taskSlice = createSlice({
     },
     addItem: (state, action: PayloadAction<TaskItem>) => {
       state.items.push(action.payload);
-      // Atualizar contagem na tarefa selecionada
       if (state.selectedTask) {
         state.selectedTask.totalItemsCount += 1;
       }
@@ -108,7 +116,6 @@ const taskSlice = createSlice({
         const isNowCompleted = action.payload.isCompleted;
         state.items[index] = action.payload;
 
-        // Atualizar contagem de completos na tarefa
         if (state.selectedTask) {
           if (!wasCompleted && isNowCompleted) {
             state.selectedTask.completedItemsCount += 1;
@@ -121,13 +128,46 @@ const taskSlice = createSlice({
     removeItem: (state, action: PayloadAction<string>) => {
       const item = state.items.find((i) => i.id === action.payload);
       state.items = state.items.filter((i) => i.id !== action.payload);
-      // Atualizar contagens na tarefa
       if (state.selectedTask) {
         state.selectedTask.totalItemsCount -= 1;
         if (item?.isCompleted) {
           state.selectedTask.completedItemsCount -= 1;
         }
       }
+    },
+
+    // ✅ NOVOS: Filtros ────────────────────────────
+    setStatusFilter: (
+      state,
+      action: PayloadAction<"ALL" | "COMPLETED" | "PENDING">,
+    ) => {
+      state.filters.status = action.payload;
+    },
+    setPriorityFilter: (
+      state,
+      action: PayloadAction<"ALL" | "LOW" | "MEDIUM" | "HIGH">,
+    ) => {
+      state.filters.priority = action.payload;
+    },
+    setSearchText: (state, action: PayloadAction<string>) => {
+      state.filters.searchText = action.payload;
+    },
+    setSortBy: (
+      state,
+      action: PayloadAction<"createdAt" | "deadline" | "priority" | "title">,
+    ) => {
+      state.filters.sortBy = action.payload;
+    },
+    setSortOrder: (state, action: PayloadAction<"asc" | "desc">) => {
+      state.filters.sortOrder = action.payload;
+    },
+    // Aplicar múltiplos filtros de uma vez
+    setFilters: (state, action: PayloadAction<Partial<TaskFilters>>) => {
+      state.filters = { ...state.filters, ...action.payload };
+    },
+    // Resetar para padrão
+    resetFilters: (state) => {
+      state.filters = initialState.filters;
     },
   },
 });
@@ -142,15 +182,21 @@ export const {
   addTask,
   updateTask,
   deleteTask,
-  setFilter,
   loadTasksFailure,
   loadTaskDetailFailure,
-  // ✅ NOVOS:
   setItemsLoading,
   setItems,
   addItem,
   updateItem,
   removeItem,
+  // ✅ NOVOS:
+  setStatusFilter,
+  setPriorityFilter,
+  setSearchText,
+  setSortBy,
+  setSortOrder,
+  setFilters,
+  resetFilters,
 } = taskSlice.actions;
 
 export default taskSlice.reducer;
