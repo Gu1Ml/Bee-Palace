@@ -20,6 +20,9 @@ public class ReminderMapper {
         reminder.setReminderType(request.getReminderType() != null
                 ? request.getReminderType()
                 : TaskReminder.ReminderType.LOCAL);
+        reminder.setRecurrence(request.getRecurrence() != null
+                ? request.getRecurrence()
+                : TaskReminder.RecurrenceType.ONCE);
         reminder.setIsSent(request.getIsSent() != null ? request.getIsSent() : false);
 
         return reminder;
@@ -32,6 +35,9 @@ public class ReminderMapper {
         if (request.getReminderType() != null) {
             reminder.setReminderType(request.getReminderType());
         }
+        if (request.getRecurrence() != null) {
+            reminder.setRecurrence(request.getRecurrence());
+        }
     }
 
     public TaskReminderResponse reminderToReminderResponse(TaskReminder reminder) {
@@ -43,6 +49,7 @@ public class ReminderMapper {
         response.setRemindAt(reminder.getRemindAt());
         response.setIsSent(reminder.getIsSent());
         response.setReminderType(reminder.getReminderType());
+        response.setRecurrence(reminder.getRecurrence());
         response.setCreatedAt(reminder.getCreatedAt());
 
         return response;
