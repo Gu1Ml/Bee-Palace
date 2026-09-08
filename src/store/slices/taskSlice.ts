@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { Reminder } from "../../data/models/reminder";
 import { Task, TaskItem } from "../../data/models/task";
 
 // ✅ NOVO: Interface para filtros
@@ -22,6 +23,10 @@ interface TaskState {
 
   items: TaskItem[];
   isItemsLoading: boolean;
+
+  // ✅ NOVO: Reminders da tarefa selecionada
+  reminders: Reminder[];
+  isRemindersLoading: boolean;
 }
 
 const initialState: TaskState = {
@@ -42,6 +47,8 @@ const initialState: TaskState = {
 
   items: [],
   isItemsLoading: false,
+  reminders: [],
+  isRemindersLoading: false,
 };
 
 const taskSlice = createSlice({
@@ -70,6 +77,7 @@ const taskSlice = createSlice({
     clearSelectedTask: (state) => {
       state.selectedTask = null;
       state.items = [];
+      state.reminders = [];
     },
     addTask: (state, action: PayloadAction<Task>) => {
       state.tasks.unshift(action.payload);
@@ -169,6 +177,29 @@ const taskSlice = createSlice({
     resetFilters: (state) => {
       state.filters = initialState.filters;
     },
+
+    // ── ✅ NOVOS: Reminders ────────────────────────────
+    setRemindersLoading: (state, action: PayloadAction<boolean>) => {
+      state.isRemindersLoading = action.payload;
+    },
+    setReminders: (state, action: PayloadAction<Reminder[]>) => {
+      state.reminders = action.payload;
+      state.isRemindersLoading = false;
+    },
+    addReminder: (state, action: PayloadAction<Reminder>) => {
+      state.reminders.push(action.payload);
+    },
+    removeReminder: (state, action: PayloadAction<string>) => {
+      state.reminders = state.reminders.filter((r) => r.id !== action.payload);
+    },
+    updateReminder: (state, action: PayloadAction<Reminder>) => {
+      const index = state.reminders.findIndex(
+        (r) => r.id === action.payload.id,
+      );
+      if (index !== -1) {
+        state.reminders[index] = action.payload;
+      }
+    },
   },
 });
 
@@ -189,7 +220,7 @@ export const {
   addItem,
   updateItem,
   removeItem,
-  // ✅ NOVOS:
+  // ✅ NOVOS: Filtros Avançados
   setStatusFilter,
   setPriorityFilter,
   setSearchText,
@@ -197,6 +228,12 @@ export const {
   setSortOrder,
   setFilters,
   resetFilters,
+  // ✅ NOVOS: Reminders
+  setRemindersLoading,
+  setReminders,
+  addReminder,
+  removeReminder,
+  updateReminder,
 } = taskSlice.actions;
 
 export default taskSlice.reducer;

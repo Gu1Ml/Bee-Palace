@@ -10,7 +10,11 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { CreateReminderRequest } from "../../data/models/reminder";
+import { useReminders } from "../../hooks/useReminders"; // ✅ NOVO
 import { useTaskDetail } from "../../hooks/useTaskDetail";
+import AddReminderModal from "../components/AddReminderModal"; // ✅ NOVO
+import ReminderList from "../components/ReminderList"; // ✅ NOVO
 import TaskItemsSection from "../components/TaskItemsSection"; // ✅ NOVO
 import { RootStackParamList } from "../navigation/AppNavigator";
 
@@ -38,9 +42,21 @@ const COLORS = {
 export default function TaskDetailScreen({ navigation, route }: Props) {
   const insets = useSafeAreaInsets();
   const { taskId } = route.params;
+
+  // ✅ TODOS OS HOOKS PRIMEIRO — nunca depois de um return
   const { task, isLoading, error, completeTask, deleteTaskDetail } =
     useTaskDetail(taskId);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showReminderModal, setShowReminderModal] = useState(false);
+
+  const {
+    upcomingReminders,
+    overdueReminders,
+    isLoading: isRemindersLoading,
+    isSaving: isSavingReminder,
+    createReminder,
+    deleteReminder,
+  } = useReminders(taskId);
 
   const handleToggleComplete = async () => {
     try {
@@ -94,6 +110,13 @@ export default function TaskDetailScreen({ navigation, route }: Props) {
       </View>
     );
   }
+
+  // ── Handler para criar lembrete ──
+  // Propaga a falha de propósito: o AddReminderModal mostra a mensagem do
+  // backend e se mantém aberto para o usuário corrigir e tentar de novo.
+  const handleCreateReminder = async (request: CreateReminderRequest) => {
+    await createReminder(request);
+  };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
@@ -232,6 +255,37 @@ export default function TaskDetailScreen({ navigation, route }: Props) {
 
         {/* ✅ NOVO: Subtarefas */}
         <TaskItemsSection taskId={task.id} />
+
+        {/* ✅ NOVO: Lembretes */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>🔔 Lembretes</Text>
+            <TouchableOpacity
+              style={styles.addReminderButton}
+              onPress={() => setShowReminderModal(true)}
+            >
+              <Text style={styles.addReminderButtonText}>+ Adicionar</Text>
+            </TouchableOpacity>
+          </View>
+
+          {isRemindersLoading ? (
+            <ActivityIndicator color={COLORS.primary} />
+          ) : (
+            <ReminderList
+              reminders={upcomingReminders}
+              overdueReminders={overdueReminders}
+              onDelete={deleteReminder}
+            />
+          )}
+        </View>
+
+        {/* ✅ Modal */}
+        <AddReminderModal
+          visible={showReminderModal}
+          onClose={() => setShowReminderModal(false)}
+          onSave={handleCreateReminder}
+          isSaving={isSavingReminder}
+        />
 
         {/* Ações */}
         <View style={styles.actionsSection}>
@@ -410,5 +464,23 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  sectionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  addReminderButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: COLORS.primary,
+  },
+  addReminderButtonText: {
+    color: COLORS.primary,
+    fontSize: 12,
+    fontWeight: "600",
   },
 });

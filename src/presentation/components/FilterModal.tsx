@@ -1,13 +1,15 @@
 import React from "react";
 import {
-    Modal,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Dimensions,
+  Modal,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { TaskFilters } from "../../store/slices/taskSlice";
+const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 interface Props {
   visible: boolean;
@@ -203,10 +205,9 @@ const styles = StyleSheet.create({
   },
   container: {
     backgroundColor: "#fff",
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    maxHeight: "90%",
-    display: "flex",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    height: Dimensions.get("window").height * 0.75, // ← altura fixa
     flexDirection: "column",
   },
   header: {
