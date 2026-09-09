@@ -34,11 +34,33 @@ public class TaskReminder {
     @Column(name = "reminder_type", nullable = false)
     private ReminderType reminderType = ReminderType.LOCAL;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "recurrence", nullable = false)
+    private RecurrenceType recurrence = RecurrenceType.ONCE;
+
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    // Enum: Tipo de Lembrete
+    // Enum: Repeticao do Lembrete
+    public enum RecurrenceType {
+        ONCE("Uma vez"),
+        DAILY("Diariamente"),
+        WEEKLY("Semanalmente"),
+        MONTHLY("Mensalmente");
+
+        private final String label;
+
+        RecurrenceType(String label) {
+            this.label = label;
+        }
+
+        public String getLabel() {
+            return label;
+        }
+    }
+
+    // Enum: Canal de entrega do Lembrete
     public enum ReminderType {
         LOCAL("Notificação local no device"),
         PUSH("Notificação push (FCM)");

@@ -19,5 +19,6 @@ public class TaskReminderResponse {
     private LocalDateTime remindAt;
     private Boolean isSent;
     private TaskReminder.ReminderType reminderType;
+    private TaskReminder.RecurrenceType recurrence;
     private LocalDateTime createdAt;
 }

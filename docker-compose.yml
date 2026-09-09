@@ -1,12 +1,14 @@
+version: '3.8'
+
 services:
-  # PostgreSQL Database
+  # PostgreSQL (já tem rodando no servidor)
   postgres:
     image: postgres:15-alpine
-    container_name: adhd_app_postgres
+    container_name: adhd_postgres
     environment:
       POSTGRES_DB: tdah_app
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_PASSWORD: porta256
     ports:
       - "5432:5432"
     volumes:
@@ -21,20 +23,18 @@ services:
 
   # Backend Spring Boot
   backend:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: adhd_app_backend
+    image: adhd-backend:latest
+    container_name: adhd_backend
     environment:
-      DB_URL: jdbc:postgresql://postgres:5432/tdah_app
+      DB_URL: jdbc:postgresql://192.168.15.11:5432/tdah_app
       DB_USERNAME: postgres
-      DB_PASSWORD: ${DB_PASSWORD}
-      JWT_SECRET: ${JWT_SECRET}
+      DB_PASSWORD: porta256
+      JWT_SECRET: TMCFwmm4gyyDM0S6gcy9LZeniubtt6PvLuAVCSp/I3qzG11GhmqrvKYs4pKmezinNk/NKNvtkfHN0U6LnWZY1g==
       FIREBASE_CREDENTIALS_PATH: /app/firebase-credentials.json
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/tdah_app
+      SPRING_DATASOURCE_URL: jdbc:postgresql://192.168.15.11:5432/tdah_app
       SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
-      APP_JWT_SECRET: ${JWT_SECRET}
+      SPRING_DATASOURCE_PASSWORD: porta256
+      APP_JWT_SECRET: TMCFwmm4gyyDM0S6gcy9LZeniubtt6PvLuAVCSp/I3qzG11GhmqrvKYs4pKmezinNk/NKNvtkfHN0U6LnWZY1g==
     ports:
       - "8080:8080"
     depends_on:
@@ -42,9 +42,6 @@ services:
         condition: service_healthy
     networks:
       - adhd-network
-    volumes:
-      # Montar firebase-credentials.json se existir
-      - ./src/main/resources/firebase-credentials.json:/app/firebase-credentials.json:ro
     restart: unless-stopped
 
 networks:
