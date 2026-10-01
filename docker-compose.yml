@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  # PostgreSQL (já tem rodando no servidor)
+  postgres:
+    image: postgres:15-alpine
+    container_name: adhd_postgres
+    environment:
+      POSTGRES_DB: tdah_app
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: porta256
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - adhd-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend Spring Boot
+  backend:
+    image: adhd-backend:latest
+    container_name: adhd_backend
+    environment:
+      DB_URL: jdbc:postgresql://192.168.15.11:5432/tdah_app
+      DB_USERNAME: postgres
+      DB_PASSWORD: porta256
+      JWT_SECRET: TMCFwmm4gyyDM0S6gcy9LZeniubtt6PvLuAVCSp/I3qzG11GhmqrvKYs4pKmezinNk/NKNvtkfHN0U6LnWZY1g==
+      FIREBASE_CREDENTIALS_PATH: /app/firebase-credentials.json
+      SPRING_DATASOURCE_URL: jdbc:postgresql://192.168.15.11:5432/tdah_app
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: porta256
+      APP_JWT_SECRET: TMCFwmm4gyyDM0S6gcy9LZeniubtt6PvLuAVCSp/I3qzG11GhmqrvKYs4pKmezinNk/NKNvtkfHN0U6LnWZY1g==
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - adhd-network
+    restart: unless-stopped
+
+networks:
+  adhd-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
