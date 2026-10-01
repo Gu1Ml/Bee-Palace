@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -12,6 +14,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -160,6 +163,50 @@ public class GlobalExceptionHandler {
                 .body(error);
     }
 
+
+    // ===== CORPO DA REQUISICAO ILEGIVEL / ENUM INVALIDO (400) =====
+
+    /**
+     * Sem este handler, um JSON malformado ou um valor de enum desconhecido cai no
+     * catch-all Exception.class abaixo e volta como 500 "Erro interno do servidor",
+     * escondendo o que na verdade e um erro do cliente.
+     */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> handleNotReadable(
+            HttpMessageNotReadableException ex, WebRequest request) {
+
+        String message = "Corpo da requisicao invalido ou malformado";
+        Map<String, String> fieldErrors = new HashMap<>();
+
+        if (ex.getCause() instanceof InvalidFormatException cause) {
+            String field = cause.getPath().isEmpty()
+                    ? "(desconhecido)"
+                    : cause.getPath().get(cause.getPath().size() - 1).getFieldName();
+
+            Class<?> target = cause.getTargetType();
+            String accepted = (target != null && target.isEnum())
+                    ? " Valores aceitos: " + Arrays.toString(target.getEnumConstants()) + "."
+                    : "";
+
+            message = "Valor invalido para o campo '" + field + "': " + cause.getValue() + "." + accepted;
+            fieldErrors.put(field, message);
+        }
+
+        log.warn("Requisicao ilegivel: {}", message);
+
+        ErrorResponse error = ErrorResponse.builder()
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error("Bad Request")
+                .message(message)
+                .path(request.getDescription(false).replace("uri=", ""))
+                .timestamp(LocalDateTime.now())
+                .errors(fieldErrors.isEmpty() ? null : fieldErrors)
+                .build();
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(error);
+    }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGlobalException(

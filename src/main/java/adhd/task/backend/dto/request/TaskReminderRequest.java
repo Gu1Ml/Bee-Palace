@@ -1,5 +1,6 @@
 package adhd.task.backend.dto.request;
 
+import adhd.task.backend.entity.TaskReminder.RecurrenceType;
 import adhd.task.backend.entity.TaskReminder.ReminderType;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.NotNull;
@@ -20,7 +21,9 @@ public class TaskReminderRequest {
     @NotNull(message = "Data/hora do lembrete é obrigatória")
     private LocalDateTime remindAt;
 
-    private ReminderType reminderType; // Padrão: LOCAL
+    private ReminderType reminderType; // Canal de entrega. Padrão: LOCAL
+
+    private RecurrenceType recurrence; // Repetição. Padrão: ONCE
 
     private Boolean isSent;
 }
